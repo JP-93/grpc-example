@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "github.com/playground.com/protobuf/hello/v1;hello";
+option go_package = "github.com/JP-93/grpc-example/protobuf/hello/v1;hello";
 
 
 message Hello {
