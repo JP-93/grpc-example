@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	pb "github.com/JP-93/grpc-example/protobuf/hello/v1"
 	"github.com/playground.com/grpcserver/service"
 	"google.golang.org/grpc"
@@ -13,6 +14,7 @@ import (
 )
 
 var (
+	port  = flag.Int("port", 9003, "the port to serve on")
 	sleep = flag.Duration("sleep", time.Second*5, "duration between changes in health")
 
 	system = "" // empty string represents the health of the system
@@ -20,7 +22,7 @@ var (
 
 func main() {
 
-	listener, err := net.Listen("tcp", ":9003")
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
 		log.Fatalf("error creating new tcp listener: %v", err)
 	}
@@ -41,7 +43,7 @@ func main() {
 		for {
 			healthcheck.SetServingStatus(system, next)
 
-			if next == healthpb.HealthCheckResponse_SERVING {
+			if next != healthpb.HealthCheckResponse_SERVING {
 				next = healthpb.HealthCheckResponse_NOT_SERVING
 			} else {
 				next = healthpb.HealthCheckResponse_SERVING
