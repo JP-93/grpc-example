@@ -1,8 +1,6 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	pb "github.com/JP-93/grpc-example/protobuf/hello/v1"
 	"github.com/playground.com/grpcserver/service"
 	"google.golang.org/grpc"
@@ -13,16 +11,11 @@ import (
 	"time"
 )
 
-var (
-	port  = flag.Int("port", 9003, "the port to serve on")
-	sleep = flag.Duration("sleep", time.Second*5, "duration between changes in health")
-
-	system = pb.HelloService_ServiceDesc.ServiceName // empty string represents the health of the system
-)
+var ()
 
 func main() {
-
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	system := pb.HelloService_ServiceDesc.ServiceName
+	listener, err := net.Listen("tcp", ":9003")
 	if err != nil {
 		log.Fatalf("error creating new tcp listener: %v", err)
 	}
@@ -37,19 +30,15 @@ func main() {
 	healthpb.RegisterHealthServer(grpcServer, healthcheck)
 
 	go func() {
-		// asynchronously inspect dependencies and toggle serving status as needed
-		next := healthpb.HealthCheckResponse_SERVING
-
 		for {
-			healthcheck.SetServingStatus(system, next)
-
-			if next != healthpb.HealthCheckResponse_SERVING {
-				next = healthpb.HealthCheckResponse_NOT_SERVING
-			} else {
-				next = healthpb.HealthCheckResponse_SERVING
+			status := healthpb.HealthCheckResponse_SERVING
+			if time.Now().Second()%2 == 0 {
+				status = healthpb.HealthCheckResponse_NOT_SERVING
 			}
+			healthcheck.SetServingStatus(system, status)
+			healthcheck.SetServingStatus("", status)
 
-			time.Sleep(*sleep)
+			time.Sleep(1 * time.Second)
 		}
 	}()
 
