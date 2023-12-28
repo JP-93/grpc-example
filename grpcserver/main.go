@@ -17,7 +17,7 @@ var (
 	port  = flag.Int("port", 9003, "the port to serve on")
 	sleep = flag.Duration("sleep", time.Second*5, "duration between changes in health")
 
-	system = "" // empty string represents the health of the system
+	system = pb.HelloService_ServiceDesc.ServiceName // empty string represents the health of the system
 )
 
 func main() {
